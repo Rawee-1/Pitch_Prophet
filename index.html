@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IPL Win Predictor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            margin: 0;
+            padding: 40px 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            width: 400px;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes resultAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #00e0ff;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #00e0ff;
+            color: #000;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #00b8d4;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            text-align: center;
+            animation: resultAppear 0.8s ease-in-out;
+        }
+
+        .image-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .image-container img {
+            width: 100%;
+            border-radius: 10px;
+            max-height: 200px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-container">
+            <img src="ipl.avif" alt="IPL Image">
+        </div>
+        <h1>IPL Win Predictor</h1>
+        <form onsubmit="predict(event)">
+            <label>Batting Team</label>
+            <select id="batting_team">
+                <option>Chennai Super Kings</option>
+                <option>Delhi Capitals</option>
+                <option>Kings XI Punjab</option>
+                <option>Kolkata Knight Riders</option>
+                <option>Mumbai Indians</option>
+                <option>Rajasthan Royals</option>
+                <option>Royal Challengers Bangalore</option>
+                <option>Sunrisers Hyderabad</option>
+            </select>
+
+            <label>Bowling Team</label>
+            <select id="bowling_team">
+                <option>Chennai Super Kings</option>
+                <option>Delhi Capitals</option>
+                <option>Kings XI Punjab</option>
+                <option>Kolkata Knight Riders</option>
+                <option>Mumbai Indians</option>
+                <option>Rajasthan Royals</option>
+                <option>Royal Challengers Bangalore</option>
+                <option>Sunrisers Hyderabad</option>
+            </select>
+
+            <label>Host City</label>
+            <select id="city">
+                <option>Bangalore</option>
+                <option>Chennai</option>
+                <option>Delhi</option>
+                <option>Hyderabad</option>
+                <option>Kolkata</option>
+                <option>Mumbai</option>
+                <option>Pune</option>
+                <option>Sharjah</option>
+            </select>
+
+            <label>Weather Condition</label>
+            <select id="weather">
+                <option>Clear</option>
+                <option>Cloudy</option>
+                <option>Rainy</option>
+                <option>Humid</option>
+                <option>Dry</option>
+                <option>Windy</option>
+            </select>
+
+            <label>Target Score</label>
+            <input type="number" id="target" required>
+
+            <label>Current Score</label>
+            <input type="number" id="score" required>
+
+            <label>Overs Completed</label>
+            <input type="number" id="overs" step="0.1" required>
+
+            <label>Wickets Fallen</label>
+            <input type="number" id="wickets" required>
+
+            <button type="submit">Predict Probability</button>
+        </form>
+
+        <div id="output" class="result" style="display:none;">
+            <p><strong><span id="batting_result"></span></strong></p>
+            <p><strong><span id="bowling_result"></span></strong></p>
+            <p><strong>Weather: <span id="weather_result"></span></strong></p>
+        </div>
+    </div>
+
+    <script>
+        function predict(event) {
+            event.preventDefault();
+
+            const batting = document.getElementById("batting_team").value;
+            const bowling = document.getElementById("bowling_team").value;
+            const city = document.getElementById("city").value;
+            const weather = document.getElementById("weather").value;
+            const score = parseInt(document.getElementById("score").value);
+            const target = parseInt(document.getElementById("target").value);
+            const overs = parseFloat(document.getElementById("overs").value);
+            const wickets = parseInt(document.getElementById("wickets").value);
+
+            let runs_left = target - score;
+            let balls_left = 120 - (overs * 6);
+            let wickets_remaining = 10 - wickets;
+            let crr = overs > 0 ? score / overs : 0;
+            let rrr = balls_left > 0 ? (runs_left * 6) / balls_left : 0;
+
+            let weather_factor = 1;
+            if (weather === "Rainy") weather_factor = 0.95;
+            else if (weather === "Humid") weather_factor = 0.98;
+            else if (weather === "Windy") weather_factor = 1.02;
+
+            let winProb = Math.min(Math.max((crr / (rrr + 0.01)) * (wickets_remaining / 10) * weather_factor, 0), 1);
+            let win = Math.round(winProb * 100);
+            let loss = 100 - win;
+
+            document.getElementById("batting_result").textContent = `${batting} - ${win}% chance of winning`;
+            document.getElementById("bowling_result").textContent = `${bowling} - ${loss}% chance of winning`;
+            document.getElementById("weather_result").textContent = weather;
+
+            const output = document.getElementById("output");
+            output.style.display = "block";
+            output.style.animation = "resultAppear 0.8s ease-in-out";
+        }
+    </script>
+</body>
+</html>
