@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IPL Win Predictor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    body {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #fff;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #00f0ff;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+      height: 90vh;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    .left-panel {
+      width: 25%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .left-panel input, .left-panel select {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      width: 100%;
+    }
+
+    .check-btn {
+      padding: 12px;
+      background: #00f0ff;
+      color: #16213e;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    .check-btn:hover {
+      background: #008cff;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 240, 255, 0.4);
+    }
+
+    .center-panel {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .stats-box {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 20px;
+      color: #00f0ff;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+      font-size: 16px;
+    }
+
+    .stats-box h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      text-shadow: 0 0 10px #00f0ff;
+    }
+
+    .last-over {
+      grid-column: 1 / -1;
+      text-align: center;
+      font-family: monospace;
+      color: #ffffff;
+    }
+
+    .prediction-container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      margin: 20px 0;
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logo img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .vs {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #00f0ff;
+    }
+
+    .right-panel {
+      width: 25%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .probability-bars {
+      display: flex;
+      gap: 40px;
+      height: 300px; /* Increased height */
+      align-items: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .bar {
+      width: 60px;
+      position: relative;
+      border-radius: 10px 10px 0 0;
+      background: linear-gradient(to top, #008cff, #00f0ff);
+      box-shadow: inset -4px -4px 6px rgba(255,255,255,0.2), inset 4px 4px 6px rgba(0,0,0,0.3);
+      transition: height 0.5s ease, background 0.5s ease;
+    }
+
+    .bar::after {
+      content: attr(data-percent) '%';
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+    }
+
+    .bar-labels {
+      display: flex;
+      gap: 40px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .bar-labels div {
+      transition: color 0.3s ease;
+    }
+
+    .bar-labels .high {
+      color: #ff4b4b;
+    }
+
+    .probability-text {
+      font-size: 1.2rem;
+      margin: 15px 0;
+      color: #00f0ff;
+      font-weight: bold;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <h1>IPL WIN PREDICTOR</h1>
+  <div class="container">
+    <div class="panel left-panel">
+      <select id="battingTeam"><option value="">Select Batting Team</option></select>
+      <select id="bowlingTeam"><option value="">Select Bowling Team</option></select>
+      <input type="number" id="targetScore" placeholder="Target Score" min="1">
+      <input type="number" id="currentScore" placeholder="Current Score" min="0">
+      <input type="number" id="oversCompleted" placeholder="Overs Completed" step="0.1" min="0" max="20">
+      <input type="number" id="wicketsFallen" placeholder="Wickets Fallen" min="0" max="10">
+      <button class="check-btn" id="calculateBtn">CALCULATE WIN PROBABILITY</button>
+    </div>
+
+    <div class="panel center-panel">
+      <div class="stats-box" id="scoreBox">
+        <h2>Match Info</h2>
+        <div class="stats-grid">
+          <div id="team1Score">Team 1 Score: -</div>
+          <div id="team2Target">Target: -</div>
+          <div id="runRate">Run Rate: -</div>
+          <div id="projScore">Projected: -</div>
+          <div class="last-over" id="lastOver">Last Over: -</div>
+        </div>
+      </div>
+
+      <div class="prediction-container">
+        <h3 id="predictionText">SELECT TEAMS TO PREDICT</h3>
+        <div class="logos">
+          <div class="logo" id="team1Logo"></div>
+          <div class="vs">VS</div>
+          <div class="logo" id="team2Logo"></div>
+        </div>
+        <div class="probability-text" id="probabilityValue"></div>
+      </div>
+    </div>
+
+    <div class="panel right-panel">
+      <div class="probability-bars">
+        <div class="bar" id="team1Bar" style="height:100px;" data-percent="50"></div>
+        <div class="bar" id="team2Bar" style="height:100px;" data-percent="50"></div>
+      </div>
+      <div class="bar-labels">
+        <div id="team1Label">TEAM 1</div>
+        <div id="team2Label">TEAM 2</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const teams = {
+      MI: { name: "Mumbai Indians", icon: "https://example.com/mi.png" },
+      CSK: { name: "Chennai Super Kings", icon: "https://example.com/csk.png" },
+      RCB: { name: "Royal Challengers Bangalore", icon: "https://example.com/rcb.png" },
+      KKR: { name: "Kolkata Knight Riders", icon: "https://example.com/kkr.png" },
+      DC: { name: "Delhi Capitals", icon: "https://example.com/dc.png" },
+      PK: { name: "Punjab Kings", icon: "https://example.com/pk.png" },
+      RR: { name: "Rajasthan Royals", icon: "https://example.com/rr.png" },
+      SRH: { name: "Sunrisers Hyderabad", icon: "https://example.com/srh.png" },
+      GT: { name: "Gujarat Titans", icon: "https://example.com/gt.png" },
+      LSG: { name: "Lucknow Super Giants", icon: "https://example.com/lsg.png" }
+    };
+
+    window.onload = () => {
+      const bt = document.getElementById("battingTeam");
+      const bl = document.getElementById("bowlingTeam");
+      for (let code in teams) {
+        bt.add(new Option(teams[code].name, code));
+        bl.add(new Option(teams[code].name, code));
+      }
+    };
+
+    function simulateLastOver() {
+      return Array.from({length: 6}, () => Math.floor(Math.random() * 7)).join(" ");
+    }
+
+    document.getElementById("calculateBtn").addEventListener("click", () => {
+      const bt = document.getElementById("battingTeam").value;
+      const bl = document.getElementById("bowlingTeam").value;
+      const tgt = +document.getElementById("targetScore").value;
+      const cur = +document.getElementById("currentScore").value;
+      const ov = +document.getElementById("oversCompleted").value || 0;
+      const wk = +document.getElementById("wicketsFallen").value || 0;
+
+      if (!bt || !bl) return alert("Select both teams");
+      if (bt === bl) return alert("Can't pick same teams");
+      if (isNaN(tgt) || isNaN(cur)) return alert("Enter valid scores");
+
+      const rr = ov > 0 ? (cur / ov).toFixed(2) : "0.00";
+      const projected = Math.round(rr * 20);
+      const lastOver = simulateLastOver();
+
+      document.getElementById("scoreBox").style.animation = 'none';
+      void document.getElementById("scoreBox").offsetWidth;
+      document.getElementById("scoreBox").style.animation = 'fadeIn 1s ease forwards';
+
+      document.getElementById("team1Score").textContent = `${teams[bt].name}: ${cur}/${wk} (${ov} overs)`;
+      document.getElementById("team2Target").textContent = `Target: ${tgt}`;
+      document.getElementById("runRate").textContent = `Run Rate: ${rr}`;
+      document.getElementById("projScore").textContent = `Projected: ${projected}`;
+      document.getElementById("lastOver").textContent = `Last Over: ${lastOver}`;
+
+      if (cur >= tgt) {
+        document.getElementById("probabilityValue").textContent = `${teams[bt].name} has already won!`;
+        updateBars(100, 0);
+        return;
+      }
+
+      const ballsLeft = (20 - ov) * 6;
+      const runsLeft = tgt - cur;
+      const wkRem = 10 - wk;
+      let prob = 50;
+      const rrr = runsLeft / (ballsLeft / 6);
+
+      if (rrr > 12) prob -= 30;
+      else if (rrr > 9) prob -= 15;
+      else if (rrr < 6) prob += 15;
+      if (wkRem < 3) prob -= 20;
+      else if (wkRem < 5) prob -= 10;
+      else if (wkRem > 7) prob += 10;
+
+      prob = Math.max(1, Math.min(99, Math.round(prob)));
+      const prob2 = 100 - prob;
+
+      document.getElementById("team1Logo").innerHTML = `<img src="${teams[bt].icon}" alt="${teams[bt].name}">`;
+      document.getElementById("team2Logo").innerHTML = `<img src="${teams[bl].icon}" alt="${teams[bl].name}">`;
+      document.getElementById("team1Label").textContent = teams[bt].name;
+      document.getElementById("team2Label").textContent = teams[bl].name;
+      document.getElementById("predictionText").textContent = `${teams[bt].name} vs ${teams[bl].name}`;
+      document.getElementById("probabilityValue").textContent = `${teams[bt].name}: ${prob}% | ${teams[bl].name}: ${prob2}%`;
+
+      updateBars(prob, prob2);
+    });
+
+    function updateBars(p1, p2) {
+      const bar1 = document.getElementById("team1Bar");
+      const bar2 = document.getElementById("team2Bar");
+
+      bar1.style.height = `${p1 * 3}px`;  // Increased scale
+      bar2.style.height = `${p2 * 3}px`;
+      bar1.setAttribute("data-percent", p1);
+      bar2.setAttribute("data-percent", p2);
+
+      const label1 = document.getElementById("team1Label");
+      const label2 = document.getElementById("team2Label");
+
+      label1.classList.remove("high");
+      label2.classList.remove("high");
+
+      if (p1 > p2) {
+        label1.classList.add("high");
+      } else if (p2 > p1) {
+        label2.classList.add("high");
+      }
+    }
+  </script>
+</body>
+</html>

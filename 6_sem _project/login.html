@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Animated Login Page</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    /* Reset and base styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body, html {
+      height: 100%;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Container */
+    .login-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      width: 350px;
+      padding: 40px 30px;
+      color: white;
+      animation: fadeSlideIn 1s ease forwards;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    @keyframes fadeSlideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Glowing Title */
+    .glow-title {
+      font-weight: 900;
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 25px;
+      background: linear-gradient(45deg, #fdd835, #ff4081, #40c4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow:
+        0 0 5px rgba(255, 255, 255, 0.4),
+        0 0 10px rgba(255, 255, 255, 0.4),
+        0 0 20px #fdd835,
+        0 0 30px #ff4081,
+        0 0 40px #40c4ff;
+      animation: flicker 3s infinite ease-in-out;
+    }
+
+    @keyframes flicker {
+      0%, 100% {
+        opacity: 1;
+        text-shadow:
+          0 0 5px rgba(255, 255, 255, 0.4),
+          0 0 10px rgba(255, 255, 255, 0.4),
+          0 0 20px #fdd835,
+          0 0 30px #ff4081,
+          0 0 40px #40c4ff;
+      }
+      50% {
+        opacity: 0.9;
+        text-shadow:
+          0 0 2px rgba(255, 255, 255, 0.2),
+          0 0 8px #fdd835,
+          0 0 18px #ff4081,
+          0 0 28px #40c4ff;
+      }
+    }
+
+    /* Input styles */
+    .input-group {
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      background: transparent;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #FDD835;
+      box-shadow: 0 0 8px #FDD835;
+    }
+
+    label {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    input:focus + label,
+    input:not(:placeholder-shown) + label {
+      top: -10px;
+      left: 12px;
+      font-size: 0.8rem;
+      color: #FDD835;
+      background: rgba(41,41,41,0.6);
+      padding: 0 6px;
+      border-radius: 5px;
+    }
+
+    .login-btn {
+      width: 100%;
+      background: #FDD835;
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      color: #222;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 5px 15px rgba(253, 216, 53, 0.6);
+    }
+
+    .login-btn:hover {
+      background: #FFC107;
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(255, 193, 7, 0.8);
+    }
+
+    .login-btn:active {
+      transform: scale(0.98);
+    }
+
+    .signup-text {
+      margin-top: 25px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .signup-text a {
+      color: #FDD835;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .signup-text a:hover {
+      color: #FFC107;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container" role="main" aria-label="Login Form">
+    <h2 class="glow-title">Pitch Prophet</h2>
+    <form>
+      <div class="input-group">
+        <input type="email" id="email" name="email" required placeholder=" " autocomplete="username" />
+        <label for="email">Email</label>
+      </div>
+      <div class="input-group">
+        <input type="password" id="password" name="password" required placeholder=" " autocomplete="current-password" />
+        <label for="password">Password</label>
+      </div>
+      <button type="submit" class="login-btn" aria-label="Log in">Log In</button>
+    </form>
+    <p class="signup-text">Don't have an account? <a href="#">Sign Up</a></p>
+  </div>
+</body>
+</html>
